@@ -10,6 +10,7 @@ export type BasicUserDocument = Document & {
     email: string;
     password: string;
     name: string;
+    phoneNumber: number;
     passwordResetToken: string;
     passwordResetExpires: Date;
     submitedProperties: Schema.Types.ObjectId[];
@@ -46,9 +47,9 @@ const UserSchemaFields = {
         required: true
     },
     phoneNumber: {
-        type: String,
+        type: Number,
         required: false,
-        default: "0000"
+        default: 0
     },
     submitedProperties: [
         {

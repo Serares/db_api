@@ -3,3 +3,4 @@
 .vscode
 /dist
 debug.log
+package-lock.json

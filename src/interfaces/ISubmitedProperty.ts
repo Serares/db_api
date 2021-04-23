@@ -10,4 +10,6 @@ export default interface ISubmitedProperty {
     rooms?: string | number,
     price: string | number,
     address: string,
+    imagesUrls: string[],
+    gcsSubfolderId: string
 }

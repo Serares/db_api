@@ -3,18 +3,63 @@ import { nanoid } from "nanoid";
 import { ETransactionType } from "../../interfaces/ETransactionType";
 import { EPropertyTypes } from "../../interfaces/EPropertyTypes";
 
+export type FeaturesDocument = Document & {
+    rooms: number,
+    buildingType: string,
+    comfort: string,
+    usableArea: number,
+    totalUsableArea: number,
+    constructionYear: number,
+    structure: string
+};
+
+export type UtilitiesDocument = Document & {
+    general: string[],
+    heatingSystem: string[],
+    conditioning: string[]
+};
+
+export type AmenitiesDocument = Document & {
+    building: string[]
+};
+
 export type ApartmentDocument = Document & {
     shortId: string,
     price: number,
     propertyType: EPropertyTypes,
     transactionType: ETransactionType,
-    coords: number[]
+    coords: number[],
+    imagesUrls: string[],
+    thumbnail: string,
+    features: FeaturesDocument,
+    utilities: UtilitiesDocument,
+    amenities: AmenitiesDocument
 };
+
+const FeaturesSchema = new Schema<FeaturesDocument>({
+    rooms: Number,
+    buildingType: String,
+    comfort: String,
+    usableArea: Number,
+    totalUsableArea: Number,
+    constructionYear: Number,
+    structure: String
+});
+
+const UtilitiesSchema = new Schema<UtilitiesDocument>({
+    general: [String],
+    heatingSystem: [String],
+    conditioning: [String]
+});
+
+const AmenitiesSchema = new Schema<AmenitiesDocument>({
+    building: [String]
+});
 
 const ApartmentSchemaFields = {
     shortId: {
         type: String,
-        default: nanoid(10)
+        default: nanoid(5)
     },
     title: {
         type: String,
@@ -32,10 +77,18 @@ const ApartmentSchemaFields = {
         type: Number,
         required: true
     },
+    imagesUrls: {
+        type: [String],
+        required: true
+    },
+    thumbnail: {
+        type: String
+    },
     // Always store coordinates longitude, latitude order.
     coords: {
         type: [Number],
-        index: "2dsphere"
+        index: "2dsphere",
+        required: true
     },
     propertyType: {
         type: Number,
@@ -48,20 +101,23 @@ const ApartmentSchemaFields = {
     postedBy: {
         type: Schema.Types.ObjectId,
         ref: "Admin"
-    }
+    },
+    utilities: UtilitiesSchema,
+    features: FeaturesSchema,
+    amenities: AmenitiesSchema
 };
 
 const apartmentSchema = new Schema(ApartmentSchemaFields, { timestamps: true });
 
-/*
 apartmentSchema.pre("save", function (next) {
-    let apartment = this as ApartmentDocument;
-    if (!apartment.isNew) {
+    let property = this as ApartmentDocument;
+    if (!property.isNew) {
         next()
     }
 
-    apartment.shortId = nanoid(10);
+    if (!property.thumbnail) {
+        property.thumbnail = property.imagesUrls[0];
+    }
 })
-*/
 
 export const Apartment = model<ApartmentDocument>("Apartment", apartmentSchema);

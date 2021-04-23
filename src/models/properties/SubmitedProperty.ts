@@ -8,19 +8,22 @@ export type SubmitedPropertyDocument = Document & {
     price: number,
     propertyType: EPropertyTypes,
     transactionType: ETransactionType,
-    images: string[],
+    imagesUrls: string[],
+    thumbnail: string,
     address: string,
     description: string,
     title: string,
     surface: number,
     rooms?: number,
-    postedBy: Schema.Types.ObjectId
+    postedBy: Schema.Types.ObjectId,
+    gcsSubfolderId: string
 };
 
+// TODO create a nested schema for property characteristics
 const SubmitedPropertySchemaFields = {
     shortId: {
         type: String,
-        default: nanoid(4)
+        default: nanoid(7)
     },
     title: {
         type: String,
@@ -42,6 +45,11 @@ const SubmitedPropertySchemaFields = {
         type: Number,
         required: true
     },
+    rooms: {
+        type: Number,
+        required: false,
+        default: 0
+    },
     propertyType: {
         type: Number,
         required: true
@@ -54,19 +62,20 @@ const SubmitedPropertySchemaFields = {
         type: Schema.Types.ObjectId,
         ref: "BasicUser"
     },
+    imagesUrls: [{
+        type: String,
+        required: true
+    }],
+    thumbnail: {
+        type: String,
+        requred: true
+    },
+    gcsSubfolderId: {
+        type: String,
+        required: true
+    }
 };
 
 const submitedPropertySchema = new Schema(SubmitedPropertySchemaFields, { timestamps: true });
-
-/*
-apartmentSchema.pre("save", function (next) {
-    let apartment = this as ApartmentDocument;
-    if (!apartment.isNew) {
-        next()
-    }
-
-    apartment.shortId = nanoid(10);
-})
-*/
 
 export const SubmitedProperty = model<SubmitedPropertyDocument>("UserSubmitedProperty", submitedPropertySchema);
