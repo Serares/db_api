@@ -3,7 +3,7 @@ import { nanoid } from "nanoid";
 import { ETransactionType } from "../../interfaces/ETransactionType";
 import { EPropertyTypes } from "../../interfaces/EPropertyTypes";
 
-export type FeaturesDocument = Document & {
+type FeaturesDocument = Document & {
     rooms: number,
     buildingType: string,
     comfort: string,
@@ -11,26 +11,24 @@ export type FeaturesDocument = Document & {
     usableArea: number,
     totalUsableArea: number,
     constructionYear: number,
-    structure: string,
-    floor: number
+    structure: string
 };
 
-export type UtilitiesDocument = Document & {
+type UtilitiesDocument = Document & {
     general: string[],
     heatingSystem: string[],
     conditioning: string[]
 };
 
-export type AmenitiesDocument = Document & {
+type AmenitiesDocument = Document & {
     building: string[]
 };
 
-export type ApartmentDocument = Document & {
+export type HouseDocument = Document & {
     shortId: string,
-    price: number,
     title: string,
     description: string,
-    address: string,
+    price: number,
     propertyType: EPropertyTypes,
     transactionType: ETransactionType,
     coords: number[],
@@ -38,9 +36,7 @@ export type ApartmentDocument = Document & {
     thumbnail: string,
     features: FeaturesDocument,
     utilities: UtilitiesDocument,
-    amenities: AmenitiesDocument,
-    postedBy: Schema.Types.ObjectId,
-    gcsSubfolderId: string
+    amenities: AmenitiesDocument
 };
 
 const FeaturesSchema = new Schema<FeaturesDocument>({
@@ -51,8 +47,7 @@ const FeaturesSchema = new Schema<FeaturesDocument>({
     usableArea: Number,
     totalUsableArea: Number,
     constructionYear: Number,
-    structure: String,
-    floor: String
+    structure: String
 });
 
 const UtilitiesSchema = new Schema<UtilitiesDocument>({
@@ -65,7 +60,7 @@ const AmenitiesSchema = new Schema<AmenitiesDocument>({
     building: [String]
 });
 
-const ApartmentSchemaFields = {
+const HouseSchemaFields = {
     shortId: {
         type: String,
         default: nanoid(7)
@@ -102,7 +97,8 @@ const ApartmentSchemaFields = {
     },
     propertyType: {
         type: Number,
-        default: EPropertyTypes.APARTMENT
+        require: true,
+        default: EPropertyTypes.HOUSE
     },
     transactionType: {
         type: Number,
@@ -118,15 +114,11 @@ const ApartmentSchemaFields = {
         require: false,
         default: false
     },
-    gcsSubfolderId: {
-        type: String,
-        required: true
-    },
     utilities: UtilitiesSchema,
     features: FeaturesSchema,
     amenities: AmenitiesSchema
 };
 
-const ApartmentSchema = new Schema(ApartmentSchemaFields, { timestamps: true });
+const HouseSchema = new Schema(HouseSchemaFields, { timestamps: true });
 
-export const ApartmentModel = model<ApartmentDocument>("Apartment", ApartmentSchema);
+export const HouseModel = model<HouseDocument>("House", HouseSchema);

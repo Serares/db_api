@@ -4,28 +4,11 @@ import { ETransactionType } from "../../interfaces/ETransactionType";
 import { EPropertyTypes } from "../../interfaces/EPropertyTypes";
 
 export type FeaturesDocument = Document & {
-    rooms: number,
-    buildingType: string,
-    comfort: string,
-    partitioning: string,
     usableArea: number,
-    totalUsableArea: number,
-    constructionYear: number,
-    structure: string,
-    floor: number
+    totalUsableArea: number
 };
 
-export type UtilitiesDocument = Document & {
-    general: string[],
-    heatingSystem: string[],
-    conditioning: string[]
-};
-
-export type AmenitiesDocument = Document & {
-    building: string[]
-};
-
-export type ApartmentDocument = Document & {
+export type LandDocument = Document & {
     shortId: string,
     price: number,
     title: string,
@@ -36,11 +19,7 @@ export type ApartmentDocument = Document & {
     coords: number[],
     imagesUrls: string[],
     thumbnail: string,
-    features: FeaturesDocument,
-    utilities: UtilitiesDocument,
-    amenities: AmenitiesDocument,
-    postedBy: Schema.Types.ObjectId,
-    gcsSubfolderId: string
+    features: FeaturesDocument
 };
 
 const FeaturesSchema = new Schema<FeaturesDocument>({
@@ -51,21 +30,10 @@ const FeaturesSchema = new Schema<FeaturesDocument>({
     usableArea: Number,
     totalUsableArea: Number,
     constructionYear: Number,
-    structure: String,
-    floor: String
+    structure: String
 });
 
-const UtilitiesSchema = new Schema<UtilitiesDocument>({
-    general: [String],
-    heatingSystem: [String],
-    conditioning: [String]
-});
-
-const AmenitiesSchema = new Schema<AmenitiesDocument>({
-    building: [String]
-});
-
-const ApartmentSchemaFields = {
+const LandSchemaFields = {
     shortId: {
         type: String,
         default: nanoid(7)
@@ -102,31 +70,26 @@ const ApartmentSchemaFields = {
     },
     propertyType: {
         type: Number,
-        default: EPropertyTypes.APARTMENT
+        require: true,
+        default: EPropertyTypes.LANDANDCOMMERCIAL
     },
     transactionType: {
         type: Number,
         required: true
-    },
-    postedBy: {
-        type: Schema.Types.ObjectId,
-        required: true,
-        ref: "Admin"
     },
     isFeatured: {
         type: Boolean,
         require: false,
         default: false
     },
-    gcsSubfolderId: {
-        type: String,
-        required: true
+    postedBy: {
+        type: Schema.Types.ObjectId,
+        required: true,
+        ref: "Admin"
     },
-    utilities: UtilitiesSchema,
-    features: FeaturesSchema,
-    amenities: AmenitiesSchema
+    features: FeaturesSchema
 };
 
-const ApartmentSchema = new Schema(ApartmentSchemaFields, { timestamps: true });
+const LandSchema = new Schema(LandSchemaFields, { timestamps: true });
 
-export const ApartmentModel = model<ApartmentDocument>("Apartment", ApartmentSchema);
+export const LandModel = model<LandDocument>("Land", LandSchema);

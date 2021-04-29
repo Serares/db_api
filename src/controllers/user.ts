@@ -1,23 +1,22 @@
 import { Request, Response, NextFunction } from 'express';
-import ISubmitUserProperty from '../interfaces/ISubmitUserProperty';
-import ISubmitedProperty from '../interfaces/ISubmitedProperty';
+import ISubmitUserPropertyRequest from '../interfaces/ISubmitUserProperty';
 import { SubmitedProperty } from '../models/properties/SubmitedProperty';
 import { BasicUser, BasicUserDocument } from '../models/users/Basic';
 import passport from 'passport';
 import logger, { timeNow } from '../utils/logger';
+import { sendJSONresponse } from '../utils/sendJsonResponse';
+import { IRequestPayload } from '../interfaces/IRequestPayload';
 
-const sendJSONresponse = function (res: Response, status: number, content: any) {
-    res.status(status).json(content);
-};
 /**
  * @route POST /user/submitProperty
  */
-export const submitUserProperty = async (req: ISubmitUserProperty, res: Response, next: NextFunction) => {
-
-    if (!req.body) {
+export const submitUserProperty = async (req: IRequestPayload, res: Response, next: NextFunction) => {
+    //TODO test this
+    if (!req.body && !req.files) {
         return sendJSONresponse(res, 401, { message: "No request body" });
-    }
-    const userEmail = req.body.userEmail;
+    };
+
+    const userEmail = req.payload.email;
     try {
         const user = await BasicUser.findOne({ email: userEmail });
         if (!user) {
@@ -26,22 +25,27 @@ export const submitUserProperty = async (req: ISubmitUserProperty, res: Response
 
         const newSubmitedProperty = new SubmitedProperty({
             postedBy: user._id,
-            title: req.body.submitedProperty.title,
-            description: req.body.submitedProperty.description,
-            transactionType: Number(req.body.submitedProperty.transactionType),
-            propertyType: Number(req.body.submitedProperty.propertyType),
-            surface: Number(req.body.submitedProperty.surface),
-            price: Number(req.body.submitedProperty.price),
-            address: req.body.submitedProperty.address
+            title: req.body.title,
+            description: req.body.description,
+            transactionType: Number(req.body.transactionType),
+            propertyType: Number(req.body.propertyType),
+            surface: Number(req.body.surface),
+            price: Number(req.body.price),
+            address: req.body.address,
+            imagesUrls: req.payload.imagesUrls,
+            gcsSubfolderId: req.payload.subdirectoryId,
+            thumbnail: req.payload.imagesUrls[0]
         });
 
-        if (req.body.submitedProperty.rooms) {
-            newSubmitedProperty.rooms = Number(req.body.submitedProperty.rooms);
+        if (req.body.rooms) {
+            newSubmitedProperty.rooms = Number(req.body.rooms);
         }
-        await user.addSubmitedProperty(newSubmitedProperty)
+
         await newSubmitedProperty.save();
+        await user.addSubmitedProperty(newSubmitedProperty);
 
         return sendJSONresponse(res, 200, { message: "Property added success" });
+
     } catch (err) {
         logger.debug("Error on submit basic property -> " + `${err} ` + timeNow);
         return sendJSONresponse(res, 500, err);
@@ -81,7 +85,7 @@ export const postSignup = async (req: Request, res: Response, next: NextFunction
 /**
  * @route POST /user/login 
  */
-export const postLogin = (req: ISubmitUserProperty, res: Response, next: NextFunction) => {
+export const postLogin = (req: ISubmitUserPropertyRequest, res: Response, next: NextFunction) => {
     passport.authenticate('loginBasic', (err, user: BasicUserDocument, info) => {
         if (err) {
             return sendJSONresponse(res, 404, err);

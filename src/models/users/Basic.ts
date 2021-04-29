@@ -11,8 +11,6 @@ export type BasicUserDocument = Document & {
     password: string;
     name: string;
     phoneNumber: number;
-    passwordResetToken: string;
-    passwordResetExpires: Date;
     submitedProperties: Schema.Types.ObjectId[];
     comparePassword: comparePasswordMethod;
     signJwt: signJwtMethod;
