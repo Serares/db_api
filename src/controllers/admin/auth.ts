@@ -19,7 +19,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 
             if (user) {
                 const token = user.signJwt();
-                return sendJSONresponse(res, 200, { "adminToken": token });
+                return sendJSONresponse(res, 200, token);
             }
 
             return sendJSONresponse(res, 401, info);

@@ -28,6 +28,7 @@ app.use((err: any, req: any, res: any, next: any) => {
         res.status(err.statusCode);
     }
     if (process.env.NODE_ENV === "development") {
+        logger.debug("Error encountered in app -> " + timeNow + " " + err);
         res.send(err);
     } else {
         logger.debug("Error encountered in app -> " + timeNow);

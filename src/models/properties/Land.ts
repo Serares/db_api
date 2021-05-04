@@ -19,18 +19,15 @@ export type LandDocument = Document & {
     coords: number[],
     imagesUrls: string[],
     thumbnail: string,
-    features: FeaturesDocument
+    features: FeaturesDocument,
+    postedBy: Schema.Types.ObjectId,
+    gcsSubfolderId: string,
+    isFeatured: boolean
 };
 
 const FeaturesSchema = new Schema<FeaturesDocument>({
-    rooms: Number,
-    buildingType: String,
-    comfort: String,
-    partitioning: String,
     usableArea: Number,
     totalUsableArea: Number,
-    constructionYear: Number,
-    structure: String
 });
 
 const LandSchemaFields = {
@@ -86,6 +83,10 @@ const LandSchemaFields = {
         type: Schema.Types.ObjectId,
         required: true,
         ref: "Admin"
+    },
+    gcsSubfolderId: {
+        type: String,
+        required: true
     },
     features: FeaturesSchema
 };

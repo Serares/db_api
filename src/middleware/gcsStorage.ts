@@ -6,8 +6,8 @@ import logger, { timeNow } from "../utils/logger";
 import path from 'path';
 import { nanoid } from 'nanoid';
 enum EgcsFolders {
-    admin = "userProperties",
-    user = "adminProperties"
+    admin = "adminProperties",
+    user = "userProperties"
 };
 
 const serviceKey = path.join(process.cwd(), "config", "keys.json");

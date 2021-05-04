@@ -7,7 +7,6 @@ type FeaturesDocument = Document & {
     rooms: number,
     buildingType: string,
     comfort: string,
-    partitioning: string,
     usableArea: number,
     totalUsableArea: number,
     constructionYear: number,
@@ -28,6 +27,7 @@ export type HouseDocument = Document & {
     shortId: string,
     title: string,
     description: string,
+    address: string,
     price: number,
     propertyType: EPropertyTypes,
     transactionType: ETransactionType,
@@ -36,14 +36,16 @@ export type HouseDocument = Document & {
     thumbnail: string,
     features: FeaturesDocument,
     utilities: UtilitiesDocument,
-    amenities: AmenitiesDocument
+    amenities: AmenitiesDocument,
+    postedBy: Schema.Types.ObjectId,
+    gcsSubfolderId: string,
+    isFeatured: boolean
 };
 
 const FeaturesSchema = new Schema<FeaturesDocument>({
     rooms: Number,
     buildingType: String,
     comfort: String,
-    partitioning: String,
     usableArea: Number,
     totalUsableArea: Number,
     constructionYear: Number,
@@ -113,6 +115,10 @@ const HouseSchemaFields = {
         type: Boolean,
         require: false,
         default: false
+    },
+    gcsSubfolderId: {
+        type: String,
+        required: true
     },
     utilities: UtilitiesSchema,
     features: FeaturesSchema,

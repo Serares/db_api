@@ -45,27 +45,33 @@ router.post("/admin/login", adminAuthCtrl.login);
 router.get("/admin/getAllSubmitedProperites", adminCtrl.getAllSubmitedProperties);
 router.get("/admin/getOneSubmitedProperty/:shortId", adminCtrl.getOneSubmitedProperty);
 router.delete("/admin/removeOneSubmitedProperty/:shortId/:gcsSubfolderId", adminCtrl.removeOneSubmitedProperty);
-// router.get("/admin/mockPropertiesCreation", adminCtrl.mockPropertiesCreation);
+router.get("/admin/mockPropertiesCreation", adminCtrl.mockPropertiesCreation);
+router.get("/admin/mockApartments", adminCtrl.mockApartments);
+router.get("/admin/mockHouses", adminCtrl.mockHouses);
+router.get("/admin/mockLands", adminCtrl.mockLands);
 
 /**
  * Admin actions on admin properties
  */
 
-router.get("/admin/getProperties", adminCtrl.getAllAadminProperties);
-
+router.get("/admin/getProperties", adminCtrl.getAllAdminProperties);
+router.get("/admin/getFeaturedProperties", adminCtrl.getFeaturedProperties);
 router.get("/admin/getApartment/:shortId", adminApartmentsCtrl.getOne);
+router.get("/admin/getAllApartments/:transactionType", adminApartmentsCtrl.getAll);
 router.post("/admin/addApartment", isAuth, uploadMulter.array("images", 20), sendUploadToGCS, adminApartmentsCtrl.add);
-router.put("/admin/updateApartment/:shortId", adminApartmentsCtrl.update);
+router.put("/admin/updateApartment/:shortId",uploadMulter.array("images", 20), adminApartmentsCtrl.update);
 router.delete("/admin/removeApartment/:shortId", adminApartmentsCtrl.remove);
 
 router.get("/admin/getHouse/:shortId", adminHousesCtrl.getOne);
+router.get("/admin/getAllHouses/:transactionType", adminHousesCtrl.getAll);
 router.post("/admin/addHouse", isAuth, uploadMulter.array("images", 20), sendUploadToGCS, adminHousesCtrl.add);
-router.put("/admin/updateHouse/:shortId", adminHousesCtrl.update);
+router.put("/admin/updateHouse/:shortId", uploadMulter.array("images", 20), adminHousesCtrl.update);
 router.delete("/admin/removeHouse/:shortId", adminHousesCtrl.remove);
 
 router.get("/admin/getLand/:shortId", adminLandsCtrl.getOne);
+router.get("/admin/getAllLands/:transactionType", adminLandsCtrl.getAll);
 router.post("/admin/addLand", isAuth, uploadMulter.array("images", 20), sendUploadToGCS, adminLandsCtrl.add);
-router.put("/admin/updateLand/:shortId", adminLandsCtrl.update);
+router.put("/admin/updateLand/:shortId", uploadMulter.array("images", 20), adminLandsCtrl.update);
 router.delete("/admin/removeLand/:shortId", adminLandsCtrl.remove);
 
 

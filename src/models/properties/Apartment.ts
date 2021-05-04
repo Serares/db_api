@@ -40,7 +40,8 @@ export type ApartmentDocument = Document & {
     utilities: UtilitiesDocument,
     amenities: AmenitiesDocument,
     postedBy: Schema.Types.ObjectId,
-    gcsSubfolderId: string
+    gcsSubfolderId: string,
+    isFeatured: boolean
 };
 
 const FeaturesSchema = new Schema<FeaturesDocument>({
