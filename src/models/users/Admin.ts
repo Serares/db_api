@@ -75,9 +75,9 @@ const AdminSchemaFields = {
     }
 };
 
-const userSchema = new Schema(AdminSchemaFields, { timestamps: true });
+const adminUserSchema = new Schema(AdminSchemaFields, { timestamps: true });
 
-userSchema.pre("save", function (next) {
+adminUserSchema.pre("save", function (next) {
     const user = this as AdminDocument;
     if (!user.isModified("password")) { return next(); }
     // auto generates the salt
@@ -141,9 +141,9 @@ const addSubmitedProperty: addSubmitedPropertyMethod = function (property) {
     return user.save();
 };
 
-userSchema.methods.comparePassword = comparePassword;
-userSchema.methods.signJwt = signJwt;
-userSchema.methods.removeSubmitedProperty = removeSubmitedProperty;
-userSchema.methods.addSubmitedProperty = addSubmitedProperty;
+adminUserSchema.methods.comparePassword = comparePassword;
+adminUserSchema.methods.signJwt = signJwt;
+adminUserSchema.methods.removeSubmitedProperty = removeSubmitedProperty;
+adminUserSchema.methods.addSubmitedProperty = addSubmitedProperty;
 
-export const Admin = model<AdminDocument>("Admin", userSchema, "adminUsers");
+export const Admin = model<AdminDocument>("Admin", adminUserSchema, "adminUsers");

@@ -5,3 +5,5 @@
 debug.log
 package-lock.json
 /config
+coverage
+services

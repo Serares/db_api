@@ -13,7 +13,6 @@ enum EgcsFolders {
 const serviceKey = path.join(process.cwd(), "config", "keys.json");
 console.log(serviceKey);
 import { Storage } from '@google-cloud/storage';
-import { sendJSONresponse } from "../utils/sendjsonresponse";
 // TODO search other ways of accessing cloud storage besides service accounts
 //TODO add the keys from keys.json to .env and from them create the file at runtime
 const storage = new Storage({

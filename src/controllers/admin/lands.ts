@@ -69,7 +69,7 @@ export const add = async (req: IRequestPayload, res: Response, next: NextFunctio
         await newProperty.save();
         await admin.addSubmitedProperty(newProperty);
 
-        sendJSONresponse(res, 200, { message: "House added success!" });
+        sendJSONresponse(res, 200, { message: "Land added success!" });
     } catch (err) {
         await removeSubmitedImages(req.payload.subdirectoryId, true);
         sendJSONresponse(res, 500, err);
@@ -108,7 +108,7 @@ export const update = async (req: Request, res: Response, next: NextFunction) =>
         foundProperty.features.totalUsableArea = req.body.totalUsableArea;
         await foundProperty.save();
 
-        sendJSONresponse(res, 200, { message: "Land added success!" });
+        sendJSONresponse(res, 200, { message: "Land Updated Success!" });
     } catch (err) {
         //TODO remove gcsimages on error
         sendJSONresponse(res, 500, err);

@@ -7,24 +7,24 @@ import * as adminHousesCtrl from '../controllers/admin/houses';
 import * as adminLandsCtrl from '../controllers/admin/lands';
 import { uploadMulter, sendUploadToGCS } from '../middleware/gcsStorage';
 import { isAuth } from '../middleware/isAuth';
+import { sendJSONresponse } from '../utils/sendJsonResponse';
 const router = Router();
 
 
-/**mvc landing page */
-router.get("/featured");
+router.get("/", (req, res, next) => {
+    sendJSONresponse(res, 200, "This api is linked to the DB")
+})
 
-router.get("/listings/:transactionType-:propertyType");
+
 /**
- * mvc listings
+ * Users Landing Page
  */
-// get apartments/:transactionType
-// get houses/:transactionType
-// get land/:transactionType
+router.get("/admin/getProperties", adminCtrl.getAllAdminProperties);
+router.get("/admin/getFeaturedProperties", adminCtrl.getFeaturedProperties);
 
 /**
  * user routes
  */
-// TODO add token validation
 router.post("/user/submitProperty", isAuth, uploadMulter.array("images", 20), sendUploadToGCS, userCtrl.submitUserProperty);
 router.post("/user/signup", userCtrl.postSignup);
 router.post("/user/login", userCtrl.postLogin);
@@ -54,12 +54,10 @@ router.get("/admin/mockLands", adminCtrl.mockLands);
  * Admin actions on admin properties
  */
 
-router.get("/admin/getProperties", adminCtrl.getAllAdminProperties);
-router.get("/admin/getFeaturedProperties", adminCtrl.getFeaturedProperties);
 router.get("/admin/getApartment/:shortId", adminApartmentsCtrl.getOne);
 router.get("/admin/getAllApartments/:transactionType", adminApartmentsCtrl.getAll);
 router.post("/admin/addApartment", isAuth, uploadMulter.array("images", 20), sendUploadToGCS, adminApartmentsCtrl.add);
-router.put("/admin/updateApartment/:shortId",uploadMulter.array("images", 20), adminApartmentsCtrl.update);
+router.put("/admin/updateApartment/:shortId", uploadMulter.array("images", 20), adminApartmentsCtrl.update);
 router.delete("/admin/removeApartment/:shortId", adminApartmentsCtrl.remove);
 
 router.get("/admin/getHouse/:shortId", adminHousesCtrl.getOne);
