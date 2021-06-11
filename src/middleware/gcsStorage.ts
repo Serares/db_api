@@ -119,6 +119,9 @@ export const sendUploadToGCS = (req: IRequestPayload, res: any, next: any) => {
         .catch(next);
 }
 
+export const removeImagesByName = () => {
+    // TODO
+}
 
 export const removeSubmitedImages = (subfolderId: string, isAdminFolder: boolean) => {
     const folder = isAdminFolder ? EgcsFolders.admin : EgcsFolders.user;

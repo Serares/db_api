@@ -73,7 +73,7 @@ export const removeOneSubmitedProperty = async (req: Request, res: Response, nex
 };
 
 /**
- * @route GET /admin/getAllAdminProperties
+ * @route GET /admin/getProperties
  */
 export const getAllAdminProperties = async (req: Request, res: Response, next: NextFunction) => {
     //TODO

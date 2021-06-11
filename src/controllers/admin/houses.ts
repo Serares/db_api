@@ -62,7 +62,7 @@ export const add = async (req: IRequestPayload, res: Response, next: NextFunctio
             transactionType: Number(req.body.transactionType),
             postedBy: admin._id,
             gcsSubfolderId: req.payload.subdirectoryId,
-            isFeatured: req.body.isFeatured,
+            isFeatured: req.body.isFeatured || false,
             features: {
                 rooms: req.body.rooms,
                 buildingType: req.body.buildingType,
