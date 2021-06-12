@@ -49,7 +49,7 @@ export const uploadMulter = multer({
 
 // TODO all the upload method should be moved to db_api
 export const sendUploadToGCS = (req: IRequestPayload, res: any, next: any) => {
-    if (!req.files && !req.body) {
+    if (!req.files) {
         return next();
     };
 
@@ -117,10 +117,90 @@ export const sendUploadToGCS = (req: IRequestPayload, res: any, next: any) => {
             next();
         })
         .catch(next);
-}
+};
 
-export const removeImagesByName = () => {
-    // TODO
+/**
+ * @param imagesUrls 
+ * imagesUrls are strings that contain /folder/subFolderId/imageName
+ * Called after validation of data
+ */
+export const removeImagesByName = (imagesUrls: Array<string>, cb: (err: any) => void) => {
+    const promises: Array<Promise<any>> = [];
+    imagesUrls.forEach((image) => {
+        const promise = new Promise((resolve, reject) => {
+            bucket.file(image).delete()
+                .then(msg => {
+                    resolve("Success")
+                })
+                .catch(err => {
+                    reject("Error deleting" + err)
+                })
+        })
+
+        promises.push(promise);
+    })
+
+
+    Promise.all(promises)
+        .then(() => {
+            logger.debug("Images deleted success " + timeNow);
+            cb(null)
+        })
+        .catch(err => {
+            logger.debug("Images deleted error " + timeNow + " " + err);
+            cb(err)
+        })
+};
+
+/**
+ * Add images to subfolder that already exists in document gcsSubfolderId
+ */
+export const addImagesForPutRequest = (subfolderId: string, imagesFiles: any, cb: (err: any, newAddedImages?: Array<string>) => void) => {
+    const bucketFolder = EgcsFolders.admin;
+    /**
+     * add uploaded images urls and send them to Property Schema
+     */
+    let uploadedImagesUrls: string[] = [];
+    let promises: Array<Promise<any>> = [];
+    Array.prototype.forEach.call(imagesFiles, ((image: any, index: any) => {
+        const gcsname = `${bucketFolder}/${subfolderId}/${Date.now()}_${image.originalname}`;
+        uploadedImagesUrls.push(gcsname);
+        const file = bucket.file(gcsname);
+        const promise = new Promise((resolve, reject) => {
+            file.createWriteStream({
+                metadata: {
+                    contentType: image.mimetype
+                }
+            })
+                .on('error', (err) => {
+                    image.cloudStorageError = err;
+                    reject(err);
+                })
+                .on('finish', async () => {
+                    try {
+                        image.cloudStorageObject = gcsname;
+                        // this is causing an error
+                        // await file.makePublic();
+                        image.cloudStoragePublicUrl = getPublicUrl(gcsname);
+                        resolve("Upload success");
+                    } catch (err) {
+                        logger.debug("Upload to GCS Failed -> " + new Date().toTimeString())
+                        reject(err)
+                    }
+
+                })
+                .end(image.buffer);
+        })
+        promises.push(promise);
+    }))
+
+    Promise.all(promises)
+        .then(() => {
+            cb(null, uploadedImagesUrls)
+        })
+        .catch((err) => {
+            cb(err)
+        });
 }
 
 export const removeSubmitedImages = (subfolderId: string, isAdminFolder: boolean) => {
@@ -141,4 +221,4 @@ export const removeSubmitedImages = (subfolderId: string, isAdminFolder: boolean
             reject("Can't find subfolderId")
         }
     })
-}
+};

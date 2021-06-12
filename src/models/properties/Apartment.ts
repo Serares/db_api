@@ -41,8 +41,16 @@ export type ApartmentDocument = Document & {
     amenities: AmenitiesDocument,
     postedBy: Schema.Types.ObjectId,
     gcsSubfolderId: string,
-    isFeatured: boolean
+    isFeatured: boolean,
+    removeImages: removeImagesMethod,
+    addNewImagesUrls: addNewImagesUrlsMethod
 };
+
+/**
+ * Remove images existing in property document
+ */
+type removeImagesMethod = (removedImages: Array<string>) => Promise<Array<string>>;
+type addNewImagesUrlsMethod = (newImagesUrls: Array<string>) => Promise<Array<string>>;
 
 const FeaturesSchema = new Schema<FeaturesDocument>({
     rooms: Number,
@@ -129,5 +137,40 @@ const ApartmentSchemaFields = {
 };
 
 const ApartmentSchema = new Schema(ApartmentSchemaFields, { timestamps: true });
+
+/**
+ * Returns a promise containing remaining imagesUrls
+ */
+const removeImages: removeImagesMethod = function (removedImages) {
+    let property = this as ApartmentDocument;
+    return new Promise(async (resolve, reject) => {
+        try {
+            let newImagesUrls = property.imagesUrls.filter((image) => {
+                return !removedImages.includes(image);
+            });
+            property.imagesUrls = newImagesUrls;
+            await property.save();
+            resolve(newImagesUrls);
+        } catch (err) {
+            reject(err)
+        }
+    })
+}
+
+const addNewImagesUrls: addNewImagesUrlsMethod = function (newImagesUrls: Array<string>) {
+    const property = this as ApartmentDocument;
+    return new Promise(async (resolve, reject) => {
+        try {
+            property.imagesUrls = [...newImagesUrls, ...property.imagesUrls];
+            await property.save();
+            resolve(property.imagesUrls);
+        } catch (err) {
+            reject(err)
+        }
+    })
+}
+
+ApartmentSchema.methods.removeImages = removeImages;
+ApartmentSchema.methods.addNewImagesUrls = addNewImagesUrls;
 
 export const ApartmentModel = model<ApartmentDocument>("Apartment", ApartmentSchema);

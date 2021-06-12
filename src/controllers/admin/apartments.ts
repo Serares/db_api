@@ -6,6 +6,7 @@ import { Admin } from '../../models/users/Admin';
 import { EPropertyTypes } from '../../interfaces/EPropertyTypes';
 import { removeSubmitedImages } from '../../middleware/gcsStorage';
 import logger, { timeNow } from '../../utils/logger';
+import { removeImagesByName, addImagesForPutRequest } from '../../middleware/gcsStorage';
 
 /**
  * @route GET /admin/getApartment/:shortId
@@ -137,11 +138,52 @@ export const update = async (req: IRequestPayload, res: Response, next: NextFunc
         foundProperty.utilities.heatingSystem = req.body.heatingSystem;
         foundProperty.utilities.conditioning = req.body.conditioning;
         foundProperty.amenities.building = req.body.building;
-        await foundProperty.save();
 
-        sendJSONresponse(res, 200, { message: "Apartment added success!" });
+        if (req.body.deletedImages) {
+            let arrayOfDeletedImages: Array<string> = [];
+            // meaning only one image has been deleted
+            if (typeof req.body.deletedImages === "string") {
+                arrayOfDeletedImages.push(req.body.deletedImages)
+            } else if (typeof req.body.deletedImages === "object" && req.body.deletedImages.length > 0) {
+                arrayOfDeletedImages = [...req.body.deletedImages];
+            }
+            foundProperty.removeImages(arrayOfDeletedImages)
+                .then((remainingImages) => {
+                    removeImagesByName(arrayOfDeletedImages, (err: any) => {
+                        if (err) {
+                            logger.debug("Apartment PUT, images deletion fail " + timeNow + " " + err);
+                            throw err;
+                        }
+                    })
+                })
+                .catch(err => {
+                    logger.debug("Removing images from document failed " + timeNow + " " + err);
+                    throw err;
+                })
+        }
+
+        if (req.files && req.files.length > 0) {
+            // Newly added urls images to GCS need to be added to property imagesUrls also
+            addImagesForPutRequest(foundProperty.gcsSubfolderId, req.files, (err, newUploadedImagesUrls) => {
+                if (err) {
+                    logger.debug("Apartment PUT, images add fail " + timeNow + " " + err);
+                    throw err;
+                }
+                foundProperty.addNewImagesUrls(newUploadedImagesUrls)
+                    .then(() => {
+                        sendJSONresponse(res, 200, { message: "Apartment updated success!" });
+                    })
+                    .catch(err => {
+                        throw err;
+                    })
+            })
+        }
+
+        await foundProperty.save();
+        sendJSONresponse(res, 200, { message: "Apartment updated success!" });
+
+
     } catch (err) {
-        //TODO remove gcsimages on error
         sendJSONresponse(res, 500, err);
     }
 };
