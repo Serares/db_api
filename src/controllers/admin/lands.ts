@@ -4,7 +4,7 @@ import { LandModel } from '../../models/properties/Land';
 import { IRequestPayload } from '../../interfaces/IRequestPayload';
 import { Admin } from '../../models/users/Admin';
 import { EPropertyTypes } from '../../interfaces/EPropertyTypes';
-import { removeSubmitedImages } from '../../middleware/gcsStorage';
+import { addImagesForPutRequest, removeImagesByName, removeSubmitedImages } from '../../middleware/gcsStorage';
 import logger, { timeNow } from '../../utils/logger';
 
 /**
@@ -106,11 +106,36 @@ export const update = async (req: Request, res: Response, next: NextFunction) =>
         foundProperty.isFeatured = req.body.isFeatured ? true : false;
         foundProperty.features.usableArea = req.body.usableArea;
         foundProperty.features.totalUsableArea = req.body.totalUsableArea;
+         // first save for all fields that have been modified except imagesUrls
+        // when saving fields are also validated by schema
         await foundProperty.save();
 
-        sendJSONresponse(res, 200, { message: "Land Updated Success!" });
+        if (req.body.deletedImages) {
+            let arrayOfDeletedImages: Array<string> = [];
+            // meaning only one image has been deleted
+            if (typeof req.body.deletedImages === "string") {
+                arrayOfDeletedImages.push(req.body.deletedImages)
+            } else if (typeof req.body.deletedImages === "object" && req.body.deletedImages.length > 0) {
+                arrayOfDeletedImages = [...req.body.deletedImages];
+            };
+            
+            await foundProperty.removeImages(arrayOfDeletedImages);
+            await removeImagesByName(arrayOfDeletedImages);
+        }
+
+        if (req.files && req.files.length > 0) {
+            // Newly added urls images to GCS need to be added to property imagesUrls also
+            const newUploadedImagesUrls = await addImagesForPutRequest(foundProperty.gcsSubfolderId, req.files);
+            await foundProperty.addNewImagesUrls(newUploadedImagesUrls);
+        }
+
+        foundProperty.thumbnail = foundProperty.imagesUrls[0];
+        await foundProperty.save();
+
+        sendJSONresponse(res, 200, { message: "Apartment updated success!" });
+
     } catch (err) {
-        //TODO remove gcsimages on error
+        logger.debug("Error for PUT request on Apartment " + timeNow + " " + err);
         sendJSONresponse(res, 500, err);
     }
 };
