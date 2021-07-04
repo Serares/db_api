@@ -14,6 +14,9 @@ export const getOne = async (req: Request, res: Response, next: NextFunction) =>
     try {
         let property = await LandModel.findOne({ shortId: req.params.shortId }).populate("postedBy");
 
+        if (!property) {
+            return sendJSONresponse(res, 404, "No property with that id found");
+        }
         sendJSONresponse(res, 200, property);
     } catch (err) {
         sendJSONresponse(res, 500, err);
@@ -23,7 +26,7 @@ export const getOne = async (req: Request, res: Response, next: NextFunction) =>
 /**
  * @route GET /getAllLands/:transactionType
  */
- export const getAll = async (req: Request, res: Response, next: NextFunction) => {
+export const getAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const projectionFields = ["thumbnail", "propertyType", "title", "address", "price", "transactionType", "shortId", "features.usableArea"]
         let property = await LandModel.find({ transactionType: Number(req.params.transactionType) }).select(projectionFields);
@@ -106,7 +109,7 @@ export const update = async (req: Request, res: Response, next: NextFunction) =>
         foundProperty.isFeatured = req.body.isFeatured ? true : false;
         foundProperty.features.usableArea = req.body.usableArea;
         foundProperty.features.totalUsableArea = req.body.totalUsableArea;
-         // first save for all fields that have been modified except imagesUrls
+        // first save for all fields that have been modified except imagesUrls
         // when saving fields are also validated by schema
         await foundProperty.save();
 
@@ -118,7 +121,7 @@ export const update = async (req: Request, res: Response, next: NextFunction) =>
             } else if (typeof req.body.deletedImages === "object" && req.body.deletedImages.length > 0) {
                 arrayOfDeletedImages = [...req.body.deletedImages];
             };
-            
+
             await foundProperty.removeImages(arrayOfDeletedImages);
             await removeImagesByName(arrayOfDeletedImages);
         }

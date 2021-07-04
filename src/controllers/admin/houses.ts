@@ -14,6 +14,9 @@ export const getOne = async (req: Request, res: Response, next: NextFunction) =>
     try {
         let property = await HouseModel.findOne({ shortId: req.params.shortId }).populate("postedBy");
 
+        if (!property) {
+            return sendJSONresponse(res, 404, "No property with that id found");
+        }
         sendJSONresponse(res, 200, property);
     } catch (err) {
         sendJSONresponse(res, 500, err);
@@ -24,7 +27,7 @@ export const getOne = async (req: Request, res: Response, next: NextFunction) =>
 /**
  * @route GET /getAllHouses/:transactionType
  */
- export const getAll = async (req: Request, res: Response, next: NextFunction) => {
+export const getAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const projectionFields = ["thumbnail", "propertyType", "title", "address", "price", "transactionType", "shortId", "features.usableArea", "features.rooms"]
         let property = await HouseModel.find({ transactionType: Number(req.params.transactionType) }).select(projectionFields);
@@ -142,7 +145,7 @@ export const update = async (req: Request, res: Response, next: NextFunction) =>
             } else if (typeof req.body.deletedImages === "object" && req.body.deletedImages.length > 0) {
                 arrayOfDeletedImages = [...req.body.deletedImages];
             };
-            
+
             await foundProperty.removeImages(arrayOfDeletedImages);
             await removeImagesByName(arrayOfDeletedImages);
         }

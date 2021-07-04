@@ -40,7 +40,7 @@ export const getOneSubmitedProperty = async (req: Request, res: Response, next: 
 };
 
 /**
- * @route GET /admin/removeOneSubmitedProperty/:shortId/:gcsSubfolderId
+ * @route DELETE /admin/removeOneSubmitedProperty/:shortId/:gcsSubfolderId
  */
 export const removeOneSubmitedProperty = async (req: Request, res: Response, next: NextFunction) => {
 

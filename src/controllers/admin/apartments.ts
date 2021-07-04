@@ -14,10 +14,12 @@ import { removeImagesByName, addImagesForPutRequest } from '../../middleware/gcs
 export const getOne = async (req: Request, res: Response, next: NextFunction) => {
     try {
         if (!req.params.shortId) {
-            return sendJSONresponse(res, 401, "No short id found");
+            return sendJSONresponse(res, 404, "No short id found");
         }
         let property = await ApartmentModel.findOne({ shortId: req.params.shortId }).populate("postedBy");
-
+        if (!property) {
+            return sendJSONresponse(res, 404, "No property with that id found");
+        }
         sendJSONresponse(res, 200, property);
     } catch (err) {
         sendJSONresponse(res, 500, err);
@@ -46,7 +48,7 @@ export const getAll = async (req: Request, res: Response, next: NextFunction) =>
 export const add = async (req: IRequestPayload, res: Response, next: NextFunction) => {
     try {
         if (!req.body && !req.files) {
-            return sendJSONresponse(res, 401, { message: "No request body" });
+            return sendJSONresponse(res, 404, { message: "No request body" });
         }
         const adminEmail = req.payload.email;
         const admin = await Admin.findOne({ email: adminEmail });
@@ -150,7 +152,7 @@ export const update = async (req: IRequestPayload, res: Response, next: NextFunc
             } else if (typeof req.body.deletedImages === "object" && req.body.deletedImages.length > 0) {
                 arrayOfDeletedImages = [...req.body.deletedImages];
             };
-            
+
             await foundProperty.removeImages(arrayOfDeletedImages);
             await removeImagesByName(arrayOfDeletedImages);
         }

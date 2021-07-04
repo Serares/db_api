@@ -11,20 +11,20 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
         if (!req.body) {
             return sendJSONresponse(res, 401, { message: "No request body" });
         }
+        let existingAdmin = await Admin.findOne({ email: req.body.email });
+        if (!existingAdmin) {
+            return sendJSONresponse(res, 401, "User not found");
+        };
+        existingAdmin.comparePassword(req.body.password, (err: Error, isMatch: boolean) => {
+            if (err) throw err;
 
-        passport.authenticate("loginAdmin", (err, user: AdminDocument, info) => {
-            if (err) {
-                return sendJSONresponse(res, 404, err);
-            }
-
-            if (user) {
-                const token = user.signJwt();
+            if (isMatch) {
+                const token = existingAdmin.signJwt();
                 return sendJSONresponse(res, 200, token);
             }
 
-            return sendJSONresponse(res, 401, info);
-        })(req, res, next)
-
+            return sendJSONresponse(res, 401, "Invalid email or password");
+        })
     } catch (err) {
         logger.debug("Error login admin ->" + err + " " + timeNow);
         sendJSONresponse(res, 500, { message: "Server error login" });
